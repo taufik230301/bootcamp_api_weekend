@@ -77,5 +77,29 @@ func main() {
 		return ctx.JSON(http.StatusOK, data)
 	})
 
+	r.DELETE("/barang/deleteData/:id_barang", func(ctx echo.Context) error {
+		psqlcom := fmt.Sprintf("host=%s port=%d user =%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+		db, err := sql.Open("postgres", psqlcom)
+
+		if err != nil {
+			data := M{"pesan": err.Error(), "Status": 400}
+			return ctx.JSON(http.StatusOK, data)
+		}
+		defer db.Close()
+
+		id_barang := ctx.Param("id_barang")
+
+		deleteStmt := "select * from delete_barang($1)"
+		_, e := db.Exec(deleteStmt, id_barang)
+
+		if e != nil {
+			data := M{"Message": e.Error(), "Status": 300}
+			return ctx.JSON(http.StatusOK, data)
+		}
+
+		data := M{"Message": "berhasil hapus data", "Status": 200}
+		return ctx.JSON(http.StatusOK, data)
+
+	})
 	r.Start(":8888")
 }
